@@ -1,17 +1,28 @@
 # four import from flask for flask responses eg
 from flask import Flask, request, make_response, jsonify
 from dbhelpers import run_statement
+# adding CROS so it will accept requests from different origins
+from flask_cors import CORS
+
 
 app = Flask(__name__)
+CORS(app)
+
 
 # ! DISPLAYS CANDIES
 @app.get('/api/candy')
 def get_candy():
     result = run_statement("CALL get_candy()")
+    keys = ["Id", "Name", "Description"]
+    candies = []
     if(type(result) == list):
-        return make_response(jsonify(result),200)
+        for item in result:
+            zipped = zip(keys, item)
+            candies.append(dict(zipped))
+        return make_response(jsonify(candies), 200)
+        # 200 code is good to get a get request
     else:
-        return make_response(jsonify(result),500)
+        return make_response(jsonify(candies), 500)
 
 
 # ! CREATE NEW CANDY
